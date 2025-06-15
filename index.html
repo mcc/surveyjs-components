@@ -2,9 +2,14 @@
 <html>
 <head>
   <title>SurveyJS Custom Component</title>
-  <script src="https://unpkg.com/survey-jquery/survey.jquery.min.js"></script>
-  <link href="https://unpkg.com/survey-core/survey.min.css" type="text/css" rel="stylesheet">
+  <script src="https://unpkg.com/survey-core/survey.core.min.js"></script>
+  
+  <script src="https://unpkg.com/survey-core/themes/index.min.js"></script>
+  <script src="https://unpkg.com/survey-js-ui/survey-js-ui.min.js"></script>
+  <link href="https://unpkg.com/survey-core/survey-core.min.css" type="text/css" rel="stylesheet">
   <script src="js/custom-component.js"></script>
+  <script src="js/surveyjs-als-component.js"></script>
+  <script src="js/surveyjs-ethnic-component.js"></script>
 </head>
 <body>
   <div id="surveyContainer"></div>
@@ -12,11 +17,18 @@
     const surveyJson = {
       elements: [{
         type: "custommessage"
-      }]
+      },{
+        type: "als-address"
+      },{
+        type: "ethnic"
+      }],
     };
 
     const survey = new Survey.Model(surveyJson);
-    $("#surveyContainer").Survey({ model: survey });
+    survey.onComplete.add((sender, options) => {
+        console.log(JSON.stringify(sender.data, null, 3));
+    });
+    survey.render(document.getElementById("surveyContainer"));
   </script>
 </body>
 </html>
