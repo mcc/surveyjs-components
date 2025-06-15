@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SurveyJS Custom Component</title>
+  <script src="https://unpkg.com/survey-jquery/survey.jquery.min.js"></script>
+  <link href="https://unpkg.com/survey-core/survey.min.css" type="text/css" rel="stylesheet">
+  <script src="js/custom-component.js"></script>
+</head>
+<body>
+  <div id="surveyContainer"></div>
+  <script>
+    const surveyJson = {
+      elements: [{
+        type: "custommessage"
+      }]
+    };
+
+    const survey = new Survey.Model(surveyJson);
+    $("#surveyContainer").Survey({ model: survey });
+  </script>
+</body>
+</html>
