@@ -1,0 +1,26 @@
+{
+  "title": "HKID Input Example Survey",
+  "pages": [
+    {
+      "name": "page1",
+      "elements": [
+        {
+          "type": "hkid",
+          "name": "hkid_input_1",
+          "title": "Please enter your Hong Kong Identity Card Number",
+          "isRequired": true,
+          "placeHolderPrefix": "e.g. A123456",
+          "placeHolderCheckDigit": "e.g. 7"
+        },
+        {
+          "type": "hkid",
+          "name": "hkid_input_2",
+          "title": "Enter another HKID (Optional)",
+          "placeHolderPrefix": "e.g. XY987654",
+          "placeHolderCheckDigit": "e.g. A"
+        }
+      ]
+    }
+  ],
+  "showQuestionNumbers": "off"
+}
