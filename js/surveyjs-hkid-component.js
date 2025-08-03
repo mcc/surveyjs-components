@@ -1,32 +1,27 @@
 // --- HKID Validation Logic ---
 const calculateHkidCheckDigit = (candidate) => {
-  const prefix = candidate.toUpperCase();
-  const pLen = prefix.length;
-  const weights = [9, 8, 7, 6, 5, 4, 3, 2];
-  let sum = 0;
+  const hkid = candidate.toUpperCase();
+  const charPart = hkid.match(/^([A-Z]{1,2})/)[1];
+  const numPart = hkid.match(/(\d{6})$/)[1];
+  const strValidChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  let checkSum = 0;
 
-  const getCharValue = (char) => {
-      return char.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+  if (charPart.length === 2) {
+    checkSum += 9 * (10 + strValidChars.indexOf(charPart[0]));
+    checkSum += 8 * (10 + strValidChars.indexOf(charPart[1]));
+  } else {
+    checkSum += 9 * 36; // space = 36
+    checkSum += 8 * (10 + strValidChars.indexOf(charPart[0]));
   }
 
-  if (pLen === 7) { // Single letter prefix
-      sum += getCharValue(prefix.charAt(0)) * weights[0];
-      for (let i = 0; i < 6; i++) {
-          sum += parseInt(prefix.charAt(i + 1)) * weights[i + 1];
-      }
-  } else { // Double letter prefix
-      sum += getCharValue(prefix.charAt(0)) * weights[0];
-      sum += getCharValue(prefix.charAt(1)) * weights[1];
-      for (let i = 0; i < 6; i++) {
-          sum += parseInt(prefix.charAt(i + 2)) * weights[i + 2];
-      }
+  for (var i = 0; i < numPart.length; i++) {
+    checkSum += (7 - i) * parseInt(numPart[i], 10);
   }
 
-  const remainder = sum % 11;
-  if (remainder === 0) return '0';
-  const checkDigit = 11 - remainder;
-  if (checkDigit === 10) return 'A';
-  return checkDigit.toString();
+  var remainder = checkSum % 11;
+  if (remainder === 0) return "0";
+  if (remainder === 1) return "A";
+  return String(11 - remainder);
 };
 
 
