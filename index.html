@@ -1,37 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SurveyJS Custom Component</title>
+  <title>SurveyJS Custom HKID Component</title>
   <script src="https://unpkg.com/survey-core/survey.core.min.js"></script>
   
   <script src="https://unpkg.com/survey-core/themes/index.min.js"></script>
   <script src="https://unpkg.com/survey-js-ui/survey-js-ui.min.js"></script>
   <link href="https://unpkg.com/survey-core/survey-core.min.css" type="text/css" rel="stylesheet">
-  <script src="js/custom-component.js"></script>
-  <script src="js/surveyjs-als-component.js"></script>
-  <script src="js/surveyjs-ethnic-component.js"></script>
+
+  <!-- The custom HKID component script -->
   <script src="js/surveyjs-hkid-component.js"></script>
-  <script src="js/surveyjs-name-split.js"></script>
-  <script src="js/surveyjs-name-combine.js"></script>
+
 </head>
 <body>
   <div id="surveyContainer"></div>
   <script>
     const surveyJson = {
-      elements: [
+      "title": "HKID Input Example Survey",
+      "pages": [
         {
-          "type": "nameCombine",
-          "name": "name",
-          "title": "Please enter your name"
+          "name": "page1",
+          "elements": [
+            {
+              "type": "hkid",
+              "name": "hkid_input_1",
+              "title": "Please enter your Hong Kong Identity Card Number",
+              "isRequired": true,
+              "placeholder": "e.g. A123456(7)"
+            },
+            {
+              "type": "hkid",
+              "name": "hkid_input_2",
+              "title": "Enter another HKID (Optional)",
+              "placeholder": "e.g. WX123456(1)"
+            }
+          ]
         }
-      ]
+      ],
+      "showQuestionNumbers": "off"
     };
 
     const survey = new Survey.Model(surveyJson);
     survey.onComplete.add((sender, options) => {
+        console.log("Survey Complete!");
         console.log(JSON.stringify(sender.data, null, 3));
     });
-    survey.render(document.getElementById("surveyContainer"));
+
+    // To run tests, you could include the test script and call runTests()
+    // For example:
+    // const testScript = document.createElement('script');
+    // testScript.src = 'tests/test-hkid-component.js';
+    // testScript.onload = () => {
+    //   runTests();
+    // };
+    // document.head.appendChild(testScript);
+
+    survey.render("surveyContainer");
   </script>
 </body>
 </html>
