@@ -83,8 +83,8 @@ function initHkidComponent(Survey) {
   }
 
   // --- SurveyJS Custom Question Model ---
-  if (Survey.QuestionTextModel && !QuestionHkidModel) {
-    QuestionHkidModel = class extends Survey.QuestionTextModel {
+  if (Survey.Question && !QuestionHkidModel) {
+    QuestionHkidModel = class extends Survey.Question {
       constructor(name) {
         super(name);
         if (HkidValidator) {
@@ -93,38 +93,43 @@ function initHkidComponent(Survey) {
       }
       getType() { return "hkid"; }
     }
-    // --- Register the new question type ---
-    Survey.Serializer.addClass("hkid", [], () => new QuestionHkidModel(""), "text");
+    Survey.Serializer.addClass("hkid", [], () => new QuestionHkidModel(""), "question");
   }
 
-  // --- Custom Widget for formatting ---
+  // --- Custom Widget for creating and formatting the input ---
   Survey.CustomWidgetCollection.Instance.add({
       name: "hkid",
       isFit: (question) => { return question.getType() === "hkid"; },
       afterRender: (question, el) => {
-          const input = question.input;
-          if (input) {
-              const handleInput = (event) => {
-                  const start = event.target.selectionStart;
-                  const oldValue = event.target.value;
-                  const formattedValue = formatHkid(oldValue);
-                  question.value = formattedValue;
-                  if (oldValue !== formattedValue) {
-                      let newCursorPos = start + (formattedValue.length - oldValue.length);
-                      event.target.value = formattedValue;
-                      event.target.setSelectionRange(newCursorPos, newCursorPos);
-                  }
-              };
-              input.addEventListener('input', handleInput);
-          }
+          // Create the input element
+          const input = document.createElement("input");
+          input.type = "text";
+          input.className = "sv-text"; // Use SurveyJS styles
+          input.placeholder = question.placeholder || "e.g. K123456(8)";
+          input.value = question.value || "";
+
+          // Attach the event listener for formatting
+          const handleInput = (event) => {
+              const start = event.target.selectionStart;
+              const oldValue = event.target.value;
+              const formattedValue = formatHkid(oldValue);
+              question.value = formattedValue; // Update the survey model
+              if (oldValue !== formattedValue) {
+                  let newCursorPos = start + (formattedValue.length - oldValue.length);
+                  event.target.value = formattedValue;
+                  event.target.setSelectionRange(newCursorPos, newCursorPos);
+              }
+          };
+          input.addEventListener('input', handleInput);
+
+          // Append the new input to the question's element
+          el.appendChild(input);
       }
   });
 }
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = initHkidComponent;
-  module.exports.validateHkid = validateHkid;
-  module.exports.QuestionHkidModel = () => QuestionHkidModel;
 } else if (typeof Survey !== 'undefined') {
   initHkidComponent(Survey);
 }
