@@ -43,10 +43,6 @@ const validateHkid = (hkid) => {
 };
 
 
-// --- Global scope variables for SurveyJS classes ---
-let HkidValidator;
-let QuestionHkidModel;
-
 const formatHkid = (text) => {
     if (!text) return "";
     let cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -64,65 +60,41 @@ const formatHkid = (text) => {
 };
 
 function initHkidComponent(Survey) {
-  // --- SurveyJS Custom Validator ---
-  if (Survey.SurveyValidator && !HkidValidator) {
-    HkidValidator = class extends Survey.SurveyValidator {
-      getType() { return "hkidvalidator"; }
-      validate(value, name) {
-        if (!value) {
-          return this.question.isRequired ? new Survey.ValidatorResult(null, false, this.getErrorText("Value is required.")) : new Survey.ValidatorResult(null, true);
-        }
-        if (!validateHkid(value)) {
-          return new Survey.ValidatorResult(value, false, this.getErrorText("Invalid HKID format or checksum."));
-        }
-        return new Survey.ValidatorResult(value, true);
-      }
-      getDefaultErrorText(name) { return "The HKID is not valid."; }
-    }
-    Survey.Serializer.addClass("hkidvalidator", [], function() { return new HkidValidator(); }, "surveyvalidator");
-  }
-
   // --- SurveyJS Custom Question Model ---
-  if (Survey.Question && !QuestionHkidModel) {
-    QuestionHkidModel = class extends Survey.Question {
-      constructor(name) {
-        super(name);
-        if (HkidValidator) {
-          this.validators.push(new HkidValidator());
-        }
-      }
+  const QuestionHkidModel = class extends Survey.Question {
       getType() { return "hkid"; }
-    }
-    Survey.Serializer.addClass("hkid", [], () => new QuestionHkidModel(""), "question");
   }
+  Survey.Serializer.addClass("hkid", [], () => new QuestionHkidModel(""), "question");
 
-  // --- Custom Widget for creating and formatting the input ---
+  // --- Custom Widget for creating and validating the input ---
   Survey.CustomWidgetCollection.Instance.add({
       name: "hkid",
       isFit: (question) => { return question.getType() === "hkid"; },
+
+      // Add validation logic
+      onValueChanged: (question) => {
+          if (question.value && !validateHkid(question.value)) {
+              question.errors = [new Survey.CustomError("The HKID is not valid.")];
+          } else {
+              question.errors = [];
+          }
+      },
+
       afterRender: (question, el) => {
           // Create the input element
           const input = document.createElement("input");
           input.type = "text";
-          input.className = "sv-text"; // Use SurveyJS styles
+          input.className = "sv-text";
           input.placeholder = question.placeholder || "e.g. K123456(8)";
           input.value = question.value || "";
 
           // Attach the event listener for formatting
-          const handleInput = (event) => {
-              const start = event.target.selectionStart;
-              const oldValue = event.target.value;
-              const formattedValue = formatHkid(oldValue);
-              question.value = formattedValue; // Update the survey model
-              if (oldValue !== formattedValue) {
-                  let newCursorPos = start + (formattedValue.length - oldValue.length);
-                  event.target.value = formattedValue;
-                  event.target.setSelectionRange(newCursorPos, newCursorPos);
-              }
-          };
-          input.addEventListener('input', handleInput);
+          input.addEventListener('input', (event) => {
+              const formattedValue = formatHkid(event.target.value);
+              question.value = formattedValue; // This will trigger onValueChanged
+              event.target.value = formattedValue;
+          });
 
-          // Append the new input to the question's element
           el.appendChild(input);
       }
   });
