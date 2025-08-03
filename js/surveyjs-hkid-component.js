@@ -47,6 +47,21 @@ const validateHkid = (hkid) => {
 let HkidValidator;
 let QuestionHkidModel;
 
+const formatHkid = (text) => {
+    if (!text) return "";
+    let cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (cleaned.length > 9) cleaned = cleaned.substring(0, 9);
+    let prefix = cleaned.match(/^[A-Z]{1,2}/);
+    if(!prefix) return cleaned;
+    prefix = prefix[0];
+    let numbers = cleaned.substring(prefix.length);
+    if(numbers.length > 6) {
+        const checkdigit = numbers.substring(6);
+        numbers = numbers.substring(0, 6);
+        return `${prefix}${numbers}(${checkdigit})`;
+    }
+    return `${prefix}${numbers}`;
+};
 
 function initHkidComponent(Survey) {
   // --- SurveyJS Custom Validator ---
@@ -77,49 +92,39 @@ function initHkidComponent(Survey) {
         }
       }
       getType() { return "hkid"; }
-      formatHkid(text) {
-        if (!text) return "";
-        let cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        if (cleaned.length > 9) cleaned = cleaned.substring(0, 9);
-        let prefix = cleaned.match(/^[A-Z]{1,2}/);
-        if(!prefix) return cleaned;
-        prefix = prefix[0];
-        let numbers = cleaned.substring(prefix.length);
-        if(numbers.length > 6) {
-          const checkdigit = numbers.substring(6);
-          numbers = numbers.substring(0, 6);
-          return `${prefix}${numbers}(${checkdigit})`;
-        }
-        return `${prefix}${numbers}`;
-      }
-      afterRender(el) {
-        super.afterRender(el);
-        const input = el.querySelector("input");
-        if (input) {
-          input.addEventListener('input', (event) => {
-            const start = event.target.selectionStart;
-            const oldValue = event.target.value;
-            const formattedValue = this.formatHkid(oldValue);
-            this.value = formattedValue;
-            if(oldValue !== formattedValue) {
-              let newCursorPos = start + (formattedValue.length - oldValue.length);
-              event.target.value = formattedValue;
-              event.target.setSelectionRange(newCursorPos, newCursorPos);
-            }
-          });
-        }
-      }
     }
     // --- Register the new question type ---
     Survey.Serializer.addClass("hkid", [], () => new QuestionHkidModel(""), "text");
-    Survey.QuestionHkidModel = QuestionHkidModel; // Attach to Survey object for test mock
   }
+
+  // --- Custom Widget for formatting ---
+  Survey.CustomWidgetCollection.Instance.add({
+      name: "hkid",
+      isFit: (question) => { return question.getType() === "hkid"; },
+      afterRender: (question, el) => {
+          const input = el.querySelector("input");
+          if (input) {
+              const handleInput = (event) => {
+                  const start = event.target.selectionStart;
+                  const oldValue = event.target.value;
+                  const formattedValue = formatHkid(oldValue);
+                  question.value = formattedValue;
+                  if (oldValue !== formattedValue) {
+                      let newCursorPos = start + (formattedValue.length - oldValue.length);
+                      event.target.value = formattedValue;
+                      event.target.setSelectionRange(newCursorPos, newCursorPos);
+                  }
+              };
+              input.addEventListener('input', handleInput);
+          }
+      }
+  });
 }
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = initHkidComponent;
   module.exports.validateHkid = validateHkid;
-  module.exports.QuestionHkidModel = () => QuestionHkidModel; // Return the class itself
+  module.exports.QuestionHkidModel = () => QuestionHkidModel;
 } else if (typeof Survey !== 'undefined') {
   initHkidComponent(Survey);
 }
