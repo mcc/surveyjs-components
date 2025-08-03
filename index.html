@@ -7,11 +7,12 @@
   <script src="https://unpkg.com/survey-core/themes/index.min.js"></script>
   <script src="https://unpkg.com/survey-js-ui/survey-js-ui.min.js"></script>
   <link href="https://unpkg.com/survey-core/survey-core.min.css" type="text/css" rel="stylesheet">
-  <!--<script src="js/custom-component.js"></script>
+  <script src="js/custom-component.js"></script>
   <script src="js/surveyjs-als-component.js"></script>
   <script src="js/surveyjs-ethnic-component.js"></script>
-  <script src="js/surveyjs-hkid-component.js"></script>-->
-  <!--<script src="js/surveyjs-name-split.js"></script>-->
+  <script src="js/surveyjs-hkid-component.js"></script>
+  <script src="js/surveyjs-name-split.js"></script>
+  <script src="js/surveyjs-name-combine.js"></script>
 </head>
 <body>
   <div id="surveyContainer"></div>
@@ -19,9 +20,9 @@
     const surveyJson = {
       elements: [
         {
-          "type": "text",
-          "name": "nameInfo",
-          "title": "Enter your full name"
+          "type": "nameCombine",
+          "name": "name",
+          "title": "Please enter your name"
         }
       ]
     };
