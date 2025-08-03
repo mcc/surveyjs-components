@@ -46,13 +46,12 @@ const validateHkid = (hkid) => {
 const formatHkid = (text) => {
     if (!text) return "";
     let cleaned = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (cleaned.length > 9) cleaned = cleaned.substring(0, 9);
     let prefix = cleaned.match(/^[A-Z]{1,2}/);
     if(!prefix) return cleaned;
     prefix = prefix[0];
     let numbers = cleaned.substring(prefix.length);
     if(numbers.length > 6) {
-        const checkdigit = numbers.substring(6);
+        let checkdigit = numbers.substring(6, 7); // Only take the first char for the check digit
         numbers = numbers.substring(0, 6);
         return `${prefix}${numbers}(${checkdigit})`;
     }
@@ -63,10 +62,20 @@ function initHkidComponent(Survey) {
   // --- SurveyJS Custom Question Model ---
   const QuestionHkidModel = class extends Survey.Question {
       getType() { return "hkid"; }
+      // This ensures that survey.onValidateQuestion is triggered for this custom question
+      hasErrors(fireCallback, rec) {
+        // Call base implementation
+        const hasErrors = super.hasErrors(fireCallback, rec);
+        // If base has no errors, check our custom validation
+        if (!hasErrors && this.value) {
+            return !validateHkid(this.value);
+        }
+        return hasErrors;
+      }
   }
   Survey.Serializer.addClass("hkid", [], () => new QuestionHkidModel(""), "question");
 
-  // --- Custom Widget for creating and validating the input ---
+  // --- Custom Widget for creating the input ---
   Survey.CustomWidgetCollection.Instance.add({
       name: "hkid",
       isFit: (question) => { return question.getType() === "hkid"; },
@@ -82,24 +91,20 @@ function initHkidComponent(Survey) {
           // Attach the event listener for formatting
           input.addEventListener('input', (event) => {
               const formattedValue = formatHkid(event.target.value);
-              question.value = formattedValue; // This will trigger onValueChanged
+              question.value = formattedValue;
               event.target.value = formattedValue;
           });
 
-          // Add validation on value changed
-          if (question.survey) {
-            question.survey.onValueChanged.add((sender, options) => {
-                if (options.question.name === question.name) {
-                    if (options.value && !validateHkid(options.value)) {
-                        question.errors = [new Survey.CustomError("The HKID is not valid.")];
-                    } else {
-                        question.errors = [];
-                    }
-                }
-            });
-          }
-
           el.appendChild(input);
+      }
+  });
+
+  // Add a global validator for the survey
+  Survey.SurveyModel.prototype.onValidateQuestion.add((sender, options) => {
+      if (options.question.getType() === "hkid") {
+          if (options.value && !validateHkid(options.value)) {
+              options.error = "The HKID is not valid.";
+          }
       }
   });
 }
