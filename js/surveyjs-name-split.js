@@ -31,28 +31,25 @@ Survey.ComponentCollection.Instance.add({
   },
   onAfterRender: function(question, el) {
     const self = this;
-
-    // Create fullname input
+    // Create fullname input with SurveyJS textbox style
     const inputFullname = document.createElement("input");
     inputFullname.type = "text";
     inputFullname.placeholder = "Full Name";
-    inputFullname.style.display = "block";
-    inputFullname.style.marginBottom = "8px";
-
-    // Create givenname field (readonly)
+    inputFullname.className = "sd-input"; // Apply SurveyJS textbox style
+    
+    // Create givenname input (readonly) with SurveyJS textbox style
     const inputGivenname = document.createElement("input");
     inputGivenname.type = "text";
     inputGivenname.placeholder = "Given Name";
     inputGivenname.readOnly = true;
-    inputGivenname.style.display = "block";
-    inputGivenname.style.marginBottom = "8px";
-
-    // Create surname field (readonly)
+    inputGivenname.className = "sd-input";
+    
+    // Create surname input (readonly) with SurveyJS textbox style
     const inputSurname = document.createElement("input");
     inputSurname.type = "text";
     inputSurname.placeholder = "Surname";
     inputSurname.readOnly = true;
-    inputSurname.style.display = "block";
+    inputSurname.className = "sd-input";
 
     el.appendChild(inputFullname);
     el.appendChild(inputGivenname);
