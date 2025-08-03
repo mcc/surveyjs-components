@@ -9,6 +9,7 @@ function initNameCombine(Survey) {
         name: "surname",
         title: "Surname",
         isRequired: true,
+        textUpdateMode: "onTyping",
       },
       {
         type: "text",
@@ -16,6 +17,7 @@ function initNameCombine(Survey) {
         title: "Given Name",
         isRequired: true,
         startWithNewLine: false,
+        textUpdateMode: "onTyping",
       },
       {
         type: "text",
