@@ -62,20 +62,10 @@ function initHkidComponent(Survey) {
   // --- SurveyJS Custom Question Model ---
   const QuestionHkidModel = class extends Survey.Question {
       getType() { return "hkid"; }
-      // This ensures that survey.onValidateQuestion is triggered for this custom question
-      hasErrors(fireCallback, rec) {
-        // Call base implementation
-        const hasErrors = super.hasErrors(fireCallback, rec);
-        // If base has no errors, check our custom validation
-        if (!hasErrors && this.value) {
-            return !validateHkid(this.value);
-        }
-        return hasErrors;
-      }
   }
   Survey.Serializer.addClass("hkid", [], () => new QuestionHkidModel(""), "question");
 
-  // --- Custom Widget for creating the input ---
+  // --- Custom Widget for creating and validating the input ---
   Survey.CustomWidgetCollection.Instance.add({
       name: "hkid",
       isFit: (question) => { return question.getType() === "hkid"; },
@@ -95,16 +85,19 @@ function initHkidComponent(Survey) {
               event.target.value = formattedValue;
           });
 
-          el.appendChild(input);
-      }
-  });
-
-  // Add a global validator for the survey
-  Survey.SurveyModel.prototype.onValidateQuestion.add((sender, options) => {
-      if (options.question.getType() === "hkid") {
-          if (options.value && !validateHkid(options.value)) {
-              options.error = "The HKID is not valid.";
+          // Add validation on the survey instance, but only once
+          if (question.survey && !question.survey.hasHkidValidator) {
+            question.survey.onValidateQuestion.add((sender, options) => {
+                if (options.question.getType() === "hkid") {
+                    if (options.value && !validateHkid(options.value)) {
+                        options.error = "The HKID is not valid.";
+                    }
+                }
+            });
+            question.survey.hasHkidValidator = true;
           }
+
+          el.appendChild(input);
       }
   });
 }
