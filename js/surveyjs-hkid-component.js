@@ -64,6 +64,7 @@ function initHkidComponent(Survey) {
   Survey.CustomWidgetCollection.Instance.add({
       name: "hkid",
       isFit: (question) => { return question.getType() === "hkid"; },
+      isDefaultRender: true,
 
       afterRender: (question, el) => {
           // Create the input element
