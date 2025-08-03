@@ -102,7 +102,7 @@ function initHkidComponent(Survey) {
       name: "hkid",
       isFit: (question) => { return question.getType() === "hkid"; },
       afterRender: (question, el) => {
-          const input = el.querySelector("input");
+          const input = question.input;
           if (input) {
               const handleInput = (event) => {
                   const start = event.target.selectionStart;
