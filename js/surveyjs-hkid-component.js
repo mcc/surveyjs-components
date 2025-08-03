@@ -31,7 +31,7 @@ const calculateHkidCheckDigit = (candidate) => {
 
 
 const validateHkid = (hkid) => {
-  if (!hkid) return false;
+  if (!hkid) return true; // Empty is not invalid, it's just empty. Required is handled separately.
   const cleanedHkid = hkid.replace(/[()\s]/g, '').toUpperCase();
   const hkidRegex = /^([A-Z]{1,2})([0-9]{6})([0-9A])$/;
   const match = cleanedHkid.match(hkidRegex);
@@ -71,15 +71,6 @@ function initHkidComponent(Survey) {
       name: "hkid",
       isFit: (question) => { return question.getType() === "hkid"; },
 
-      // Add validation logic
-      onValueChanged: (question) => {
-          if (question.value && !validateHkid(question.value)) {
-              question.errors = [new Survey.CustomError("The HKID is not valid.")];
-          } else {
-              question.errors = [];
-          }
-      },
-
       afterRender: (question, el) => {
           // Create the input element
           const input = document.createElement("input");
@@ -93,6 +84,15 @@ function initHkidComponent(Survey) {
               const formattedValue = formatHkid(event.target.value);
               question.value = formattedValue; // This will trigger onValueChanged
               event.target.value = formattedValue;
+          });
+
+          // Add validation on value changed
+          question.onValueChanged.add((sender, options) => {
+              if (options.value && !validateHkid(options.value)) {
+                  question.errors = [new Survey.CustomError("The HKID is not valid.")];
+              } else {
+                  question.errors = [];
+              }
           });
 
           el.appendChild(input);
