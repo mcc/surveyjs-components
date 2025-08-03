@@ -7,10 +7,10 @@
   <script src="https://unpkg.com/survey-core/themes/index.min.js"></script>
   <script src="https://unpkg.com/survey-js-ui/survey-js-ui.min.js"></script>
   <link href="https://unpkg.com/survey-core/survey-core.min.css" type="text/css" rel="stylesheet">
-  <script src="js/custom-component.js"></script>
+  <!--<script src="js/custom-component.js"></script>
   <script src="js/surveyjs-als-component.js"></script>
   <script src="js/surveyjs-ethnic-component.js"></script>
-  <script src="js/surveyjs-hkid-component.js"></script>
+  <script src="js/surveyjs-hkid-component.js"></script>-->
   <script src="js/surveyjs-name-split.js"></script>
 </head>
 <body>
@@ -22,18 +22,8 @@
           "type": "fullnameSplit",
           "name": "nameInfo",
           "title": "Enter your full name"
-        },
-        {
-        type: "custommessage"
-      },{
-        type: "als-address"
-      },{
-        type: "ethnic"
-      },{
-        type: "hkid",
-        name: "hkid_input",
-        title: "Please enter your HKID" // This title will be used by the HKID component
-      }],
+        }
+      ]
     };
 
     const survey = new Survey.Model(surveyJson);
