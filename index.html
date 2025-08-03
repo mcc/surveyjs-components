@@ -15,47 +15,40 @@
 <body>
   <div id="surveyContainer"></div>
   <script>
-    const surveyJson = {
-      "title": "HKID Input Example Survey",
-      "pages": [
-        {
-          "name": "page1",
-          "elements": [
-            {
-              "type": "hkid",
-              "name": "hkid_input_1",
-              "title": "Please enter your Hong Kong Identity Card Number",
-              "isRequired": true,
-              "placeholder": "e.g. A123456(7)"
-            },
-            {
-              "type": "hkid",
-              "name": "hkid_input_2",
-              "title": "Enter another HKID (Optional)",
-              "placeholder": "e.g. WX123456(1)"
-            }
-          ]
-        }
-      ],
-      "showQuestionNumbers": "off"
-    };
+    document.addEventListener("DOMContentLoaded", function() {
+      const surveyJson = {
+        "title": "HKID Input Example Survey",
+        "pages": [
+          {
+            "name": "page1",
+            "elements": [
+              {
+                "type": "hkid",
+                "name": "hkid_input_1",
+                "title": "Please enter your Hong Kong Identity Card Number",
+                "isRequired": true,
+                "placeholder": "e.g. K123456(8)"
+              },
+              {
+                "type": "hkid",
+                "name": "hkid_input_2",
+                "title": "Enter another HKID (Optional)",
+                "placeholder": "e.g. W123456(A)"
+              }
+            ]
+          }
+        ],
+        "showQuestionNumbers": "off"
+      };
 
-    const survey = new Survey.Model(surveyJson);
-    survey.onComplete.add((sender, options) => {
-        console.log("Survey Complete!");
-        console.log(JSON.stringify(sender.data, null, 3));
+      const survey = new Survey.Model(surveyJson);
+      survey.onComplete.add((sender, options) => {
+          console.log("Survey Complete!");
+          console.log(JSON.stringify(sender.data, null, 3));
+      });
+
+      survey.render(document.getElementById("surveyContainer"));
     });
-
-    // To run tests, you could include the test script and call runTests()
-    // For example:
-    // const testScript = document.createElement('script');
-    // testScript.src = 'tests/test-hkid-component.js';
-    // testScript.onload = () => {
-    //   runTests();
-    // };
-    // document.head.appendChild(testScript);
-
-    survey.render("surveyContainer");
   </script>
 </body>
 </html>
