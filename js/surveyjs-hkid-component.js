@@ -87,13 +87,17 @@ function initHkidComponent(Survey) {
           });
 
           // Add validation on value changed
-          question.onValueChanged.add((sender, options) => {
-              if (options.value && !validateHkid(options.value)) {
-                  question.errors = [new Survey.CustomError("The HKID is not valid.")];
-              } else {
-                  question.errors = [];
-              }
-          });
+          if (question.survey) {
+            question.survey.onValueChanged.add((sender, options) => {
+                if (options.question.name === question.name) {
+                    if (options.value && !validateHkid(options.value)) {
+                        question.errors = [new Survey.CustomError("The HKID is not valid.")];
+                    } else {
+                        question.errors = [];
+                    }
+                }
+            });
+          }
 
           el.appendChild(input);
       }
