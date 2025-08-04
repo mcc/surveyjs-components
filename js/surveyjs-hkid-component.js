@@ -70,7 +70,7 @@ function initHkidComponent(Survey) {
           // Create the input element
           const input = document.createElement("input");
           input.type = "text";
-          input.className = "sv-text";
+          input.className = "sd-input";
           input.placeholder = question.placeholder || "e.g. K123456(8)";
 
           let previousValue = question.value || "";
