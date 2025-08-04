@@ -72,13 +72,26 @@ function initHkidComponent(Survey) {
           input.type = "text";
           input.className = "sv-text";
           input.placeholder = question.placeholder || "e.g. K123456(8)";
-          input.value = question.value || "";
+
+          let previousValue = question.value || "";
+          input.value = previousValue;
 
           // Attach the event listener for formatting
           input.addEventListener('input', (event) => {
-              const formattedValue = formatHkid(event.target.value);
-              question.value = formattedValue;
-              event.target.value = formattedValue;
+              const currentValue = event.target.value;
+
+              // If backspacing from a fully formatted value like "A123456(7)"
+              if (previousValue.match(/\(\w\)$/) && currentValue.length < previousValue.length) {
+                  const unformatted = previousValue.substring(0, previousValue.length - 3);
+                  question.value = unformatted;
+                  event.target.value = unformatted;
+                  previousValue = unformatted;
+              } else {
+                  const formattedValue = formatHkid(currentValue);
+                  question.value = formattedValue;
+                  event.target.value = formattedValue;
+                  previousValue = formattedValue;
+              }
           });
 
           // Add validation on the survey instance, but only once
@@ -100,6 +113,9 @@ function initHkidComponent(Survey) {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = initHkidComponent;
+  // For testing purposes
+  initHkidComponent.validateHkid = validateHkid;
+  initHkidComponent.formatHkid = formatHkid;
 } else if (typeof Survey !== 'undefined') {
   initHkidComponent(Survey);
 }

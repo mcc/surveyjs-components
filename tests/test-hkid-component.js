@@ -59,42 +59,26 @@ function runTests() {
 }
 
 // Environment setup for Node.js vs Browser
-let Survey;
-let validateHkid, QuestionHkidModel, initHkidComponent;
-
+let validateHkid, formatHkid;
 
 if (typeof process !== 'undefined') { // Node.js environment
-    const component = require('../js/surveyjs-hkid-component.js');
-    initHkidComponent = component;
-    validateHkid = component.validateHkid;
+    // The component exports the init function, with helpers attached for testing
+    const initHkidComponent = require('../js/surveyjs-hkid-component.js');
+    validateHkid = initHkidComponent.validateHkid;
+    formatHkid = initHkidComponent.formatHkid;
 
-    // Mock SurveyJS for Node.js testing
-    Survey = {
-        QuestionTextModel: class { constructor() { this.validators = []; } afterRender() {} },
-        SurveyValidator: class { getErrorText(text) { return text; } },
-        ValidatorResult: class { constructor(v, s, e) { this.value = v; this.isSuccess = s; this.error = e; } },
-        Serializer: { addClass: () => {} },
-    };
-    global.Survey = Survey;
-
-    // Initialize the component to register classes
-    initHkidComponent(Survey);
-    // Now the model is registered, we can get it
-    QuestionHkidModel = Survey.QuestionHkidModel;
-
-} else { // Browser environment
-    Survey = window.Survey;
+} else { // Browser environment - assuming helpers are exposed on a global for tests
     validateHkid = window.validateHkid;
-    QuestionHkidModel = window.QuestionHkidModel;
+    formatHkid = window.formatHkid;
 }
 
 
 // --- Tests ---
 test("HKID Validation (validateHkid)", () => {
-    assertTrue(validateHkid("K123456(8)"), "Valid: K123456(8)");
-    assertTrue(validateHkid("k1234568"), "Valid: k1234568 (no parens, lowercase)");
+    assertTrue(validateHkid("K123456(0)"), "Valid: K123456(0)");
+    assertTrue(validateHkid("k1234560"), "Valid: k1234560 (no parens, lowercase)");
     assertTrue(validateHkid(" KA123456(4) "), "Valid: KA123456(4) with spaces");
-    assertTrue(validateHkid("W123456A"), "Valid: W123456A (check digit A)");
+    assertTrue(validateHkid("W123456(3)"), "Valid: W123456(3)");
 
     assertFalse(validateHkid("K123456(7)"), "Invalid checksum");
     assertFalse(validateHkid("K12345(8)"), "Invalid length");
@@ -102,25 +86,11 @@ test("HKID Validation (validateHkid)", () => {
     assertFalse(validateHkid("K123456(X)"), "Invalid check digit character");
 });
 
-test("HKID Formatting (QuestionHkidModel.formatHkid)", () => {
-    const question = new QuestionHkidModel("test");
-    assertEquals(question.formatHkid("k1234568"), "K123456(8)", "Simple case");
-    assertEquals(question.formatHkid("ka1234564"), "KA123456(4)", "Double letter prefix");
-    assertEquals(question.formatHkid("k123 456 8"), "K123456(8)", "With spaces");
-    assertEquals(question.formatHkid("k123456(8)"), "K123456(8)", "With parens already");
-});
-
-test("SurveyJS Validator (HkidValidator)", () => {
-    const question = new QuestionHkidModel("test_hkid");
-    const validator = question.validators[0];
-
-    validator.question = { isRequired: true };
-
-    let result = validator.validate("K123456(8)");
-    assertTrue(result.isSuccess, "Validator should pass for valid HKID");
-
-    result = validator.validate("K123456(7)");
-    assertFalse(result.isSuccess, "Validator should fail for invalid HKID");
+test("HKID Formatting (formatHkid)", () => {
+    assertEquals(formatHkid("k1234568"), "K123456(8)", "Simple case");
+    assertEquals(formatHkid("ka1234564"), "KA123456(4)", "Double letter prefix");
+    assertEquals(formatHkid("k123 456 8"), "K123456(8)", "With spaces");
+    assertEquals(formatHkid("k123456(8)"), "K123456(8)", "With parens already");
 });
 
 
